@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        h1 {
+            background-color: aqua;
+        }
+    </style>
+</head>
+<body>
+    <a href = "../index.html">Home</a>
+    <h2>Code of key pressed:</h2>
+    <h1 id="keyPressed"></h1>
+    <h2>Result of casting to upper case:</h2>
+    <h1 id="keyPressedUpper"></h1>
+    <script>
+        window.addEventListener('keydown', function (e) {
+            document.getElementById("keyPressed").innerHTML = e.key;
+            document.getElementById("keyPressedUpper").innerHTML = e.key.toUpperCase();
+        })
+    </script>
+</body>
+</html>

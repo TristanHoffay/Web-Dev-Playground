@@ -3,11 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .slideContainer {
+            display:flex;
+        }
+    </style>
     <title>Document</title>
 </head>
 <body>
     <a href = "../../index.html">Home</a>
+    <div class="slideContainer">
+        <input type="range" min="1" max="200" value="60" class="slider" id="fpsSlider">
+        <p id="fpsDisplay">60 fps</p>
+    </div>>
+    <script>
+        var fpsOutput = document.getElementById("fpsDisplay");
+    </script>
+    <script src="GameEngine.js"></script>
     <script src="game1.js"></script>
-    <script>startGame()</script>
+    <script>TestGame();</script>
 </body>
 </html>

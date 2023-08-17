@@ -1,9 +1,10 @@
 var myGamePiece;
-var myObstacle;
+var myObstacles = [];
+var myScore;
 
 function startGame() {
     myGamePiece = new component(30, 30, "red", 10, 120)
-    myObstacle = new component(10, 200, "green", 300, 120);
+    myScore = new component("30px", "Consolas", "black", 280, 40, "text");
     myGameArea.start();
 }
 
@@ -15,6 +16,7 @@ var myGameArea = {
         //this.canvas.style.cursor = "none";
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 1000/165);
         window.addEventListener('mousedown', function (e) {
             myGameArea.mouseDown = true;
@@ -46,7 +48,13 @@ var myGameArea = {
     }
 }
 
-function component(width, height, color, x, y) {
+function everyinterval(n) {
+    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+    return false;
+}
+
+function component(width, height, color, x, y, type) {
+    this.type = type;
     this.width = width;
     this.height = height;
     this.speedX = 0;
@@ -55,6 +63,11 @@ function component(width, height, color, x, y) {
     this.y = y;
     this.update = function() {
         ctx = myGameArea.context;
+        if(this.type == "text") {
+            ctx.font = this.width + " " + this.height;
+            ctx.fillStyle = color;
+            ctx.fillText(this.text, this.x, this.y);
+        }
         ctx.fillStyle = color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
@@ -83,43 +96,45 @@ function component(width, height, color, x, y) {
 }
 
 function updateGameArea() {
-    if (myGamePiece.crashWith(myObstacle)) {
-        myGameArea.stop();
-    } else {
-        myGameArea.clear();
-        myObstacle.update();
-        // if (myGameArea.mouseDown)
-        // {
-        //     myGamePiece.x = myGameArea.mousex;
-        //     myGamePiece.y = myGameArea.mousey;
-        // }
-        myGamePiece.speedX = 0;
-        myGamePiece.speedY = 0;
-        if (myGameArea.keys && myGameArea.keys["A"]) {myGamePiece.speedX = -1;}
-        if (myGameArea.keys && myGameArea.keys["D"]) {myGamePiece.speedX = 1;}
-        if (myGameArea.keys && myGameArea.keys["W"]) {myGamePiece.speedY = -1;}
-        if (myGameArea.keys && myGameArea.keys["S"]) {myGamePiece.speedY = 1;}
-        myGamePiece.newPos();
-        myGamePiece.update();
+    var x, y;
+    for (i = 0; i < myObstacles.length; i += 1) {
+        if (myGamePiece.crashWith(myObstacles[i])) {
+            myGameArea.stop();
+            return;
+        }
     }
-}
+    myGameArea.clear();
+    myGameArea.frameNo += 1;
+    if (myGameArea.frameNo == 1 || everyinterval(150)) {
+        x = myGameArea.canvas.width;
+        minHeight = 20;
+        maxHeight = 200;
+        height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
+        minGap = 50;
+        maxGap = 200;
+        gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
 
-function moveup() {
-    myGamePiece.speedY -= 1;
-}
-
-function movedown() {
-    myGamePiece.speedY += 1;
-}
-
-function moveleft() {
-    myGamePiece.speedX -= 1;
-}
-
-function moveright() {
-    myGamePiece.speedX += 1;
-}
-function stopMove() {
+        myObstacles.push(new component(10, height, "green", x, 0));
+        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
+    }
+    for (i = 0; i < myObstacles.length; i++) {
+        myObstacles[i].speedX = -1;
+        myObstacles[i].newPos();
+        myObstacles[i].update();
+    }
+    myScore.text = "SCORE: " + myGameArea.frameNo;
+    myScore.update();
+    // if (myGameArea.mouseDown)
+    // {
+    //     myGamePiece.x = myGameArea.mousex;
+    //     myGamePiece.y = myGameArea.mousey;
+    // }
     myGamePiece.speedX = 0;
     myGamePiece.speedY = 0;
+    if (myGameArea.keys && myGameArea.keys["A"]) {myGamePiece.speedX = -1;}
+    if (myGameArea.keys && myGameArea.keys["D"]) {myGamePiece.speedX = 1;}
+    if (myGameArea.keys && myGameArea.keys["W"]) {myGamePiece.speedY = -1;}
+    if (myGameArea.keys && myGameArea.keys["S"]) {myGamePiece.speedY = 1;}
+    myGamePiece.newPos();
+    myGamePiece.update();
 }

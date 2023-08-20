@@ -72,6 +72,21 @@ function camera(x, y, worldx, worldy, zoom) {
     this.worldx = worldx;
     this.worldy = worldy;
     this.zoom = zoom; // zoom should be at least 1, or objects might not appear to move smoothly
+    this.objectoutofframe = function(x, y, w, h) { // returns how far out of frame object is
+        let objleft = x;
+        let objright = x + w;
+        let objtop = y;
+        let objbottom = y + h;
+        let camwidth = scene.width/(2*this.zoom);
+        let camheight = scene.height/(2*this.zoom);
+
+        let distance = 0
+        distance += Math.max(0, this.worldx - camwidth - objright);
+        distance += Math.max(0, objleft - this.worldx - camwidth);
+        distance += Math.max(0, this.worldy - camheight - objbottom);
+        distance += Math.max(0, objtop - this.worldy - camheight);
+        return distance;
+    }
 }
 // Active scene
 var scene = {
@@ -80,10 +95,11 @@ var scene = {
         // Create and insert canvas
         this.width = innerWidth;
         this.height = innerWidth * (9/16);
-        this.camera = new camera(this.width/2, this.height/2, 0, 0, 1);
+        this.camera = new camera(this.width/2, this.height/2, 0, 0, this.width/1000);
         this.canvas.width = this.width;
         this.canvas.height = this.height;
         this.context = this.canvas.getContext("2d");
+        this.canvas.id = "gameCanvas";
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 
         // Set framerate and physics intervals
@@ -216,15 +232,15 @@ function physics(speedx, speedy, gravity, bounce, friction, object, dynamic) {
         return finalcheck;
     }
     this.collides = function(offsetx, offsety, otherobj) {
-        var myleft = this.object.x + offsetx;
-        var myright = this.object.x + offsetx + this.object.width;
-        var mytop = this.object.y + offsety;
-        var mybottom = this.object.y + offsety + this.object.height;
-        var otherleft = otherobj.x;
-        var otherright = otherobj.x + otherobj.width;
-        var othertop = otherobj.y;
-        var otherbottom = otherobj.y + otherobj.height;
-        var collides = 0;
+        let myleft = this.object.x + offsetx;
+        let myright = this.object.x + offsetx + this.object.width;
+        let mytop = this.object.y + offsety;
+        let mybottom = this.object.y + offsety + this.object.height;
+        let otherleft = otherobj.x;
+        let otherright = otherobj.x + otherobj.width;
+        let othertop = otherobj.y;
+        let otherbottom = otherobj.y + otherobj.height;
+        let collides = 0;
         if ((mybottom < othertop) ||
         (mytop > otherbottom) ||
         (myright < otherleft) ||

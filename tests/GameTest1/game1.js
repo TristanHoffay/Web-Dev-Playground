@@ -1,12 +1,14 @@
-// Create and modify objects and stuff here for specific game usage
-var player;
-var platforms = [];
-platforms.name = "platforms";
-var lastplatformx = 500;
-var score;
-
-
 function TestGame() {
+    // Create and modify objects and stuff here for specific game usage
+    var player;
+    var platforms = [];
+    platforms.name = "platforms";
+    var lastplatformx = 500;
+    var score;
+
+
+
+
     // // Create a player
     // player = new object(0, 0, 50, 50);
     // player.renderer = new renderer(2, player, "red");
@@ -23,6 +25,11 @@ function TestGame() {
     // Create score
     score = new textbox("30px", "Verdana", "black", 100, 40, "Score: 0");
     score.score = 0;
+    // Create debug info
+    if (debugLevel > 0) {
+        var camZoomText = new textbox("20px", "Verdana", "black", 100, 60, "Camera Zoom: ")
+        new action(camZoomText).updateaction = function() {camZoomText.text = "Camera Zoom: " + scene.camera.zoom}
+    }
     // Create a player
     player = new object(0, 0, 50, 50);
     player.renderer = new renderer(2, player, "red");
@@ -49,7 +56,7 @@ function TestGame() {
              score.score = player.y;
              score.text = "Score: " + -1 * Math.floor(score.score / 100);
         }
-        if (player.y < playerAction.nextHeight + 200) {
+        if (player.y < playerAction.nextHeight + scene.height/(2*scene.camera.zoom)) {
             playerAction.nextHeight -= 200;
             let nextx = (Math.random() * 1000) - 500;
             nextx = nextx < lastplatformx-400 ? lastplatformx-400 : nextx > lastplatformx + 400 ? lastplatformx + 400 : nextx;
@@ -58,6 +65,15 @@ function TestGame() {
             platform(Math.random() * 1000 - 500, playerAction.nextHeight, 100, 20);
             
             fallingplatform((Math.random() * 1000) - 500, playerAction.nextHeight - 100, 100, 20);
+        }
+        if (scene.camera.objectoutofframe(player.x, player.y, player.w, player.h)) {
+            // game over
+
+
+
+
+
+            
         }
     }
     player.action = playerAction;
@@ -71,7 +87,7 @@ function TestGame() {
         addtolist(this, platforms);
         var platAction = new action(ground);
         platAction.updateaction = function() {
-            if (scene.camera.worldy + 200 < ground.y) {
+            if (scene.camera.objectoutofframe(ground.x, ground.y, ground.width, ground.height) > 500) {
                 ground.renderer.remove();
                 ground.physics.remove();
                 ground.remove();
@@ -93,12 +109,16 @@ function TestGame() {
             setTimeout(fall, 500, ground.physics);
         }
         addtolist(this, platforms);
-        // var platAction = new action(ground);
-        // platAction.updateaction = function() {
-        //     if (scene.camera.worldy + 50 < ground.y) {
-        //         ground.renderer.remove();
-        //     }
-        // }
+        var platAction = new action(ground);
+        platAction.updateaction = function() {
+            if (scene.camera.objectoutofframe(ground.x, ground.y, ground.width, ground.height) > 500) {
+                ground.renderer.remove();
+                ground.physics.remove();
+                ground.remove();
+                removefromlist(this, platforms);
+                platAction.remove();
+            }
+        }
     }
     platform(-500, 100, 1000, 100);
     
